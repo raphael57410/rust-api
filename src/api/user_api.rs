@@ -28,3 +28,16 @@ pub fn create_user(
         Err(_) => Err(Status::InternalServerError),
     }
 }
+
+#[get("/users/<user_id>")]
+pub fn get_one_user(db: &State<MongoRepo>, user_id: String) -> Result<Json<User>, Status> {
+    let id = user_id;
+    if id.is_empty() {
+        return Err(Status::BadRequest);
+    };
+    let user_detail = db.get_one("users", &id);
+    match user_detail {
+        Ok(user) => Ok(Json(user)),
+        Err(_) => Err(Status::InternalServerError),
+    }
+}
