@@ -2,15 +2,13 @@ use std::env;
 extern crate dotenv;
 use dotenv::dotenv;
 
-use mongodb::{
-    bson::{extjson::de::Error},
-    results::{ InsertOneResult},
-    sync::{Client, Collection},
-};
-use crate::models::user_model::User;
+use mongodb::{bson::{extjson::de::Error}, sync::{Client}};
+use mongodb::results::InsertOneResult;
+use mongodb::sync::Database;
+use serde::{Deserialize, Serialize};
 
 pub struct MongoRepo {
-    col: Collection<User>,
+    db: Database,
 }
 
 impl MongoRepo {
@@ -22,33 +20,27 @@ impl MongoRepo {
         };
         let client = Client::with_uri_str(uri).unwrap();
         let db = client.database("seriousgame");
-        let col: Collection<User> = db.collection("users");
-        MongoRepo { col }
+/*        let col: Collection<User> = db.collection("users");*/
+        MongoRepo { db }
     }
 
-    pub fn create_user(&self, new_user: User) -> Result<InsertOneResult, Error> {
-        let new_doc = User {
-            id: None,
-            firstName: new_user.firstName,
-            lastName: new_user.lastName,
-            email: new_user.email,
-            role: new_user.role,
-        };
-        let user = self
-            .col
-            .insert_one(new_doc, None)
+    // create
+    pub fn create<T:Serialize>(&self, collection_name: &str, new_item: T) ->Result<InsertOneResult, Error>{
+        let item = self.db
+            .collection(collection_name)
+            .insert_one(new_item, None)
             .ok()
-            .expect("Error creating user");
-        Ok(user)
+            .expect("Error creating");
+        Ok(item)
     }
 
-    pub fn get_all_users(&self) -> Result<Vec<User>, Error> {
-        let cursors = self
-            .col
+    // list
+    pub fn list<T: Unpin + Sync + Send + for<'de> Deserialize<'de>>(&self, collection_name: &str) -> Result<Vec<T>, Error> {
+        let cursors = self.db.collection(collection_name)
             .find(None, None)
             .ok()
-            .expect("Error getting list of users");
-        let users = cursors.map(|doc| doc.unwrap()).collect();
-        Ok(users)
+            .expect("Error getting list");
+        let items = cursors.map(|doc| doc.unwrap()).collect();
+        Ok(items)
     }
 }
