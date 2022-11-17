@@ -46,12 +46,26 @@ impl MongoRepo {
     }
 
     // get one
-    pub fn get_one<T: Unpin + Sync + Send + for<'de> Deserialize<'de>>(&self, collection_name: &str,id:&str) -> Result<T, Error> {
+    pub fn get_one<T: Unpin + Sync + Send + for<'de> Deserialize<'de>>(&self, collection_name: &str, id:&str) -> Result<T, Error> {
         let obj_id = ObjectId::parse_str(id).unwrap();
+
         let filter = doc! {"_id": obj_id};
         let item = self
             .db
             .collection(collection_name)
+            .find_one(filter, None)
+            .ok()
+            .expect("Error getting one item");
+        Ok(item.unwrap())
+    }
+
+    // get one by email
+    pub fn get_one_by_email<T: Unpin + Sync + Send + for<'de> Deserialize<'de>>(&self,  email:&str) -> Result<T, Error> {
+
+        let filter = doc! {"email": email};
+        let item = self
+            .db
+            .collection("users")
             .find_one(filter, None)
             .ok()
             .expect("Error getting one item");
