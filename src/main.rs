@@ -8,6 +8,7 @@ use crate::repository::mongodb_repo::MongoRepo;
 
 // import des routes de user
 use api::user_api::{get_all_users,create_user,get_one_user};
+use api::home_api::home;
 
 
 #[launch]
@@ -15,5 +16,6 @@ fn rocket() -> _ {
     let db = MongoRepo::init();
     rocket::build()
         .manage(db)
+        .mount("/api",routes![home])
         .mount("/api", routes![get_all_users,create_user,get_one_user])
 }

@@ -11,7 +11,6 @@ use serde::{Deserialize, Serialize};
 pub struct MongoRepo {
     db: Database,
 }
-
 impl MongoRepo {
     pub fn init() -> Self {
         dotenv().ok();
@@ -24,6 +23,7 @@ impl MongoRepo {
 /*        let col: Collection<User> = db.collection("users");*/
         MongoRepo { db }
     }
+
 
     // create
     pub fn create<T:Serialize>(&self, collection_name: &str, new_item: T) ->Result<InsertOneResult, Error>{

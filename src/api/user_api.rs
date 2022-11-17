@@ -1,6 +1,8 @@
+use argon2::{Config};
 use mongodb::results::InsertOneResult;
 use crate::{models::user_model::User, repository::mongodb_repo::MongoRepo};
 use rocket::{http::Status, serde::json::Json, State};
+
 
 #[get("/users")]
 pub fn get_all_users(db: &State<MongoRepo>) -> Result<Json<Vec<User>>, Status> {
@@ -15,10 +17,18 @@ pub fn create_user(
     db: &State<MongoRepo>,
     new_user: Json<User>,
 ) -> Result<Json<InsertOneResult>, Status> {
+
+    // hashage du mot de passe
+    let binding = new_user.password.to_owned();
+    let salt = b"randomsalt";
+    let config = Config::default();
+    let hash = argon2::hash_encoded(binding.as_ref(), salt, &config).unwrap();
+
     let new_user = User {
         id: None,
         firstName: new_user.firstName.to_owned(),
         lastName: new_user.lastName.to_owned(),
+        password: hash.to_string(),
         email: new_user.email.to_owned(),
         role: new_user.role.to_owned(),
     };
