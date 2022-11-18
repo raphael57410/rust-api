@@ -71,4 +71,18 @@ impl MongoRepo {
             .expect("Error getting one item");
         Ok(item.unwrap())
     }
+    // Delete
+    pub fn delete<T: Unpin + Sync + Send + for<'de> Deserialize<'de>>(&self, collection_name:&str,  id:&str) -> Result<T, Error> {
+
+        let obj_id = ObjectId::parse_str(id).unwrap();
+
+        let filter = doc! {"_id": obj_id};
+        let item = self
+            .db
+            .collection(collection_name)
+            .find_one_and_delete(filter,None)
+            .ok()
+            .expect("Error getting one item");
+        Ok(item.unwrap())
+    }
 }

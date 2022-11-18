@@ -51,3 +51,18 @@ pub fn get_one_user(db: &State<MongoRepo>, user_id: String) -> Result<Json<User>
         Err(_) => Err(Status::InternalServerError),
     }
 }
+
+#[post("/users/<user_id>")]
+pub fn delete_user(db: &State<MongoRepo>, user_id: String) -> Result<Json<User>, Status> {
+    let id = user_id;
+
+    if id.is_empty() {
+        return Err(Status::BadRequest);
+    };
+
+    let user_detail = db.delete::<User>("users", &id);
+    match user_detail {
+        Ok(user) => Ok(Json(user)),
+        Err(_) => Err(Status::InternalServerError),
+    }
+}
