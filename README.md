@@ -41,3 +41,10 @@
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | **required** `id`      | `string` |  Get one user by id |
+
+```http
+  POST /api/users/<user_id>
+```
+| Parameter | Type     | Description       |
+| :-------- | :------- |:------------------|
+| **required** `id`      | `string` | Delete user by id |
